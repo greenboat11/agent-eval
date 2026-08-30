@@ -3,6 +3,8 @@ from unittest.mock import MagicMock
 from tools.executor import SandboxedExecutor, ToolResult
 from tools.recon import nmap_scan, whois_lookup, dns_lookup
 from tools.web import http_get, http_post, parse_html
+from tools.crypto import decrypt_caesar, decrypt_xor, frequency_analysis
+from tools.forensics import run_strings, identify_file
 
 
 def test_executor_runs_command_successfully():
@@ -83,3 +85,53 @@ def test_parse_html_missing_selector():
     html = "<html><body></body></html>"
     result = parse_html(html, "p.flag")
     assert result.success is False
+
+
+def test_decrypt_caesar_shift3():
+    result = decrypt_caesar("Khoor", 3)
+    assert result.success is True
+    assert "Hello" in result.output
+
+
+def test_decrypt_caesar_all_shifts_when_shift_zero():
+    result = decrypt_caesar("Khoor", 0)
+    assert result.success is True
+    assert "Hello" in result.output
+
+
+def test_decrypt_xor_basic():
+    import binascii
+    plaintext = b"flag"
+    key = b"\x00"
+    cipher_hex = binascii.hexlify(bytes(a ^ b for a, b in zip(plaintext, key * len(plaintext)))).decode()
+    key_hex = binascii.hexlify(key).decode()
+    result = decrypt_xor(cipher_hex, key_hex)
+    assert result.success is True
+    assert "flag" in result.output
+
+
+def test_frequency_analysis_returns_sorted():
+    result = frequency_analysis("aaabbc")
+    assert result.success is True
+    assert result.output.index("a") < result.output.index("b")
+
+
+def test_run_strings_calls_executor(mocker):
+    mock_executor = MagicMock()
+    mock_executor.run.return_value = ToolResult(
+        tool_name="strings", args={}, output="CTF{secret}", success=True,
+        execution_hash="xyz", duration_ms=20
+    )
+    result = run_strings("/tmp/binary", 4, mock_executor)
+    mock_executor.run.assert_called_once()
+    assert "strings" in mock_executor.run.call_args[0][0]
+
+
+def test_identify_file_calls_executor(mocker):
+    mock_executor = MagicMock()
+    mock_executor.run.return_value = ToolResult(
+        tool_name="file", args={}, output="PNG image", success=True,
+        execution_hash="abc", duration_ms=5
+    )
+    result = identify_file("/tmp/image.png", mock_executor)
+    mock_executor.run.assert_called_once()
