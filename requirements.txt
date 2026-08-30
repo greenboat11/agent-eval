@@ -1,0 +1,15 @@
+anthropic>=0.34.0
+openai>=1.40.0
+pycryptodome>=3.20.0
+pwntools>=4.12.0
+requests>=2.32.0
+beautifulsoup4>=4.12.0
+python-dotenv>=1.0.0
+pyyaml>=6.0.1
+networkx>=3.3
+structlog>=24.1.0
+click>=8.1.7
+pytest>=8.2.0
+pytest-mock>=3.14.0
+ruff>=0.5.0
+mypy>=1.10.0

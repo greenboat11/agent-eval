@@ -1,0 +1,35 @@
+agents:
+  orchestrator:
+    model: claude-haiku-4-5-20251001
+    max_tokens: 4096
+    max_escalation_attempts: 2
+  specialists:
+    recon:
+      model: thudm/glm-4-flash
+      max_tokens: 2048
+    web:
+      model: thudm/glm-4-flash
+      max_tokens: 2048
+    crypto:
+      model: google/gemini-flash-2.0
+      max_tokens: 2048
+    forensics:
+      model: thudm/glm-4-flash
+      max_tokens: 2048
+    reversing:
+      model: google/gemini-flash-2.0
+      max_tokens: 2048
+    pwn:
+      model: thudm/glm-4-flash
+      max_tokens: 2048
+
+monitor:
+  thresholds:
+    volume_multiplier: 3.0       # >3x baseline triggers ELEVATED
+    adherence_min: 0.6           # cosine similarity floor
+    volume_window_seconds: 300   # 5-minute rolling window
+  halt_on_critical: false        # set true to stop run on CRITICAL
+
+tools:
+  timeout_seconds: 30
+  max_output_bytes: 65536
