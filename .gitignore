@@ -11,3 +11,5 @@ reports/*/
 workspace/
 *.egg-info/
 dist/
+.superpowers/
+docs/superpowers/
