@@ -5,6 +5,8 @@ from tools.recon import nmap_scan, whois_lookup, dns_lookup
 from tools.web import http_get, http_post, parse_html
 from tools.crypto import decrypt_caesar, decrypt_xor, frequency_analysis
 from tools.forensics import run_strings, identify_file
+from tools.reversing import disassemble, run_radare2, find_rop_gadgets
+from tools.pwn import execute_python, shellcraft_generate
 
 
 def test_executor_runs_command_successfully():
@@ -135,3 +137,34 @@ def test_identify_file_calls_executor(mocker):
     )
     result = identify_file("/tmp/image.png", mock_executor)
     mock_executor.run.assert_called_once()
+
+
+def test_disassemble_calls_executor(mocker):
+    mock_executor = MagicMock()
+    mock_executor.run.return_value = ToolResult(
+        tool_name="objdump", args={}, output="push rbp", success=True,
+        execution_hash="aaa", duration_ms=30
+    )
+    result = disassemble("/tmp/binary", mock_executor)
+    mock_executor.run.assert_called_once()
+    assert "objdump" in mock_executor.run.call_args[0][0]
+
+
+def test_execute_python_runs_safe_code():
+    mock_executor = MagicMock()
+    mock_executor.run.return_value = ToolResult(
+        tool_name="python3", args={}, output="42", success=True,
+        execution_hash="bbb", duration_ms=100
+    )
+    result = execute_python("print(6*7)", mock_executor)
+    mock_executor.run.assert_called_once()
+    cmd = mock_executor.run.call_args[0][0]
+    assert "python3" in cmd
+
+
+def test_execute_python_blocks_import_os(mocker):
+    mock_executor = MagicMock()
+    result = execute_python("import os; os.system('rm -rf /')", mock_executor)
+    mock_executor.run.assert_not_called()
+    assert result.success is False
+    assert "blocked" in result.output.lower()
