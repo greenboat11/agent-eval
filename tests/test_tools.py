@@ -1,5 +1,8 @@
 import pytest
+from unittest.mock import MagicMock
 from tools.executor import SandboxedExecutor, ToolResult
+from tools.recon import nmap_scan, whois_lookup, dns_lookup
+from tools.web import http_get, http_post, parse_html
 
 
 def test_executor_runs_command_successfully():
@@ -42,3 +45,41 @@ def test_executor_different_output_different_hash():
     r1 = executor.run(["echo", "foo"], args={}, tool_name="echo")
     r2 = executor.run(["echo", "bar"], args={}, tool_name="echo")
     assert r1.execution_hash != r2.execution_hash
+
+
+def test_nmap_scan_calls_executor(mocker):
+    mock_executor = MagicMock()
+    mock_executor.run.return_value = ToolResult(
+        tool_name="nmap", args={}, output="open 80/tcp", success=True,
+        execution_hash="abc123", duration_ms=100
+    )
+    result = nmap_scan("localhost", "80", mock_executor)
+    mock_executor.run.assert_called_once()
+    called_cmd = mock_executor.run.call_args[0][0]
+    assert "nmap" in called_cmd
+    assert "localhost" in called_cmd
+
+
+def test_http_get_calls_executor(mocker):
+    mock_executor = MagicMock()
+    mock_executor.run.return_value = ToolResult(
+        tool_name="curl", args={}, output="HTTP/1.1 200 OK\n<html>", success=True,
+        execution_hash="def456", duration_ms=50
+    )
+    result = http_get("http://localhost/flag", {}, mock_executor)
+    mock_executor.run.assert_called_once()
+    called_cmd = mock_executor.run.call_args[0][0]
+    assert "curl" in called_cmd or "http://localhost/flag" in " ".join(called_cmd)
+
+
+def test_parse_html_extracts_tag():
+    html = "<html><body><p class='flag'>CTF{test}</p></body></html>"
+    result = parse_html(html, "p.flag")
+    assert result.success is True
+    assert "CTF{test}" in result.output
+
+
+def test_parse_html_missing_selector():
+    html = "<html><body></body></html>"
+    result = parse_html(html, "p.flag")
+    assert result.success is False
