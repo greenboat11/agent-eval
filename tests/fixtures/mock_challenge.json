@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "name": "Hello Flags",
+  "description": "Find the flag in the service running at localhost:9000",
+  "category": "web",
+  "value": 100,
+  "files": [],
+  "flag_format": "CTF\\{[\\w_]+\\}"
+}
