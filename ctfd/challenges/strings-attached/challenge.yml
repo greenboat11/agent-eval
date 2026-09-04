@@ -1,0 +1,23 @@
+name: Strings Attached
+author: agent-eval
+category: forensics
+description: |
+  We ran `strings` on a suspicious binary and got thousands of lines of output.
+
+  Buried in the noise was this:
+
+  ```
+  ���..ELF..x86_64....
+  __libc_start_main
+  puts
+  CTF{strings_reveal_secrets}
+  GCC: (Ubuntu 11.4.0) 11.4.0
+  .symtab
+  ���...
+  ```
+
+  Find the flag.
+value: 75
+type: standard
+flags:
+  - CTF{strings_reveal_secrets}

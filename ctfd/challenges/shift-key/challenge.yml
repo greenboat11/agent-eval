@@ -1,0 +1,15 @@
+name: Shift Key
+author: agent-eval
+category: crypto
+description: |
+  We intercepted an encoded transmission:
+
+  **Khoor, Fwi!**
+
+  Our analysts believe a simple substitution was used. Can you decode it?
+
+  Flag format: `CTF{...}` — lowercase, underscores for spaces.
+value: 50
+type: standard
+flags:
+  - CTF{hello_ctf}

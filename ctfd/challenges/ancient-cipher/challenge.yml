@@ -1,0 +1,13 @@
+name: Ancient Cipher
+author: agent-eval
+category: crypto
+description: |
+  A message was found scrawled on the server room wall:
+
+  **EGS{ebg13_vf_abg_rapelcgvba}**
+
+  The first three characters suggest this is a flag in disguise.
+value: 50
+type: standard
+flags:
+  - CTF{rot13_is_not_encryption}

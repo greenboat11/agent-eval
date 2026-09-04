@@ -1,0 +1,15 @@
+services:
+  ctfd:
+    image: ctfd/ctfd:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=change-me-in-production
+      - DATABASE_URL=sqlite:////var/data/ctfd.db
+      - UPLOAD_FOLDER=/var/data/uploads
+    volumes:
+      - ctfd_data:/var/data
+    restart: unless-stopped
+
+volumes:
+  ctfd_data:
