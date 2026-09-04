@@ -2,26 +2,35 @@ VENV = .venv
 PYTHON = $(VENV)/bin/python
 PIP = $(VENV)/bin/pip
 
-.PHONY: setup ctfd-up ctfd-down run test lint replay tune
+.PHONY: setup build up down challenges run run-docker test lint replay tune
 
+# Local dev setup (Linux/Mac or WSL)
 setup:
 	python3.11 -m venv $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install -r requirements.txt
-	@echo "Installing tool binaries (may require sudo)..."
-	@which nmap || (sudo apt-get install -y nmap 2>/dev/null || brew install nmap 2>/dev/null || echo "Install nmap manually")
-	@which binwalk || (pip install binwalk 2>/dev/null || echo "Install binwalk manually")
-	@which exiftool || (sudo apt-get install -y exiftool 2>/dev/null || brew install exiftool 2>/dev/null || echo "Install exiftool manually")
-	@which r2 || echo "Install radare2 manually from https://rada.re/n/"
 
-ctfd-up:
-	docker compose -f ctfd/docker-compose.yml up -d
+# Docker workflow (recommended on Windows)
+build:
+	docker compose build runner
 
-ctfd-down:
-	docker compose -f ctfd/docker-compose.yml down
+up:
+	docker compose up -d ctfd
 
+down:
+	docker compose down
+
+# Push starter challenges to CTFd (requires CTFd running + CTFD_TOKEN in .env)
+challenges:
+	$(PYTHON) scripts/push_challenges.py
+
+# Run locally (Linux/WSL)
 run:
 	$(PYTHON) runner.py --challenge $(CHALLENGE)
+
+# Run in Docker (Windows-friendly — no WDAC, tools pre-installed)
+run-docker:
+	docker compose run --rm runner --challenge $(CHALLENGE)
 
 test:
 	$(PYTHON) -m pytest tests/ -v

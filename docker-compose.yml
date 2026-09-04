@@ -1,0 +1,35 @@
+services:
+  ctfd:
+    image: ctfd/ctfd:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=change-me-in-production
+      - DATABASE_URL=sqlite:////var/data/ctfd.db
+      - UPLOAD_FOLDER=/var/data/uploads
+    volumes:
+      - ctfd_data:/var/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  runner:
+    build: .
+    env_file: .env
+    environment:
+      # Override so runner reaches CTFd via Docker network, not localhost
+      - CTFD_URL=http://ctfd:8000
+    volumes:
+      - ./workspace:/app/workspace
+      - ./reports:/app/reports
+    depends_on:
+      ctfd:
+        condition: service_healthy
+    # Run as one-shot: docker compose run runner --challenge 1
+    profiles: ["run"]
+
+volumes:
+  ctfd_data:
