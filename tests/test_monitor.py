@@ -1,16 +1,14 @@
 import hashlib
 
-import pytest
-
-from bus.message import Message, MessageType
-from monitor.control_monitor import ControlMonitor, ControlState, StateTransition
-from monitor.signals import (
+from agenteval.monitors.baseline_per_agent import (
     AdherenceSignal,
+    ControlMonitor,
+    ControlState,
     GraphSignal,
     IntegritySignal,
-    SignalResult,
     VolumeSignal,
 )
+from bus.message import Message, MessageType
 
 
 def make_msg(sender, recipient, mtype=MessageType.TASK_ASSIGN, content=None):

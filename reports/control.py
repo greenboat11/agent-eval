@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from monitor.control_monitor import ControlState, StateTransition
+from agenteval.monitors.baseline_per_agent import ControlState, StateTransition
 
 
 class ControlReport:

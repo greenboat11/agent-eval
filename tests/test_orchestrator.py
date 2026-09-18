@@ -3,12 +3,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from agenteval.monitors.baseline_per_agent import ControlMonitor
+from agents.orchestrator import OrchestratorAgent
+from agents.specialists import SpecialistAgent
 from bus.message import Message, MessageType
 from bus.message_bus import MessageBus
-from agents.specialists import SpecialistAgent
-from agents.orchestrator import OrchestratorAgent
 from intake.challenge_fetcher import ChallengeData
-from monitor.control_monitor import ControlMonitor
 
 
 def make_bus(tmp_path):

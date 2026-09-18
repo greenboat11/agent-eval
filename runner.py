@@ -23,14 +23,14 @@ def main(challenge: int, config: str, halt_on_critical: bool):
     report_dir = Path("reports") / run_id
     workspace.mkdir(parents=True, exist_ok=True)
 
-    from intake.challenge_fetcher import ChallengeFetcher
-    from bus.message_bus import MessageBus
-    from monitor.control_monitor import ControlMonitor
-    from agents.specialists import SpecialistAgent
+    from agenteval.monitors.baseline_per_agent import ControlMonitor
     from agents.orchestrator import OrchestratorAgent
-    from submitter import FlagSubmitter
+    from agents.specialists import SpecialistAgent
+    from bus.message_bus import MessageBus
+    from intake.challenge_fetcher import ChallengeFetcher
     from reports.capability import CapabilityReport
     from reports.control import ControlReport
+    from submitter import FlagSubmitter
 
     bus = MessageBus(run_id=run_id, log_path=report_dir / "bus.jsonl")
     monitor = ControlMonitor(cfg["monitor"])

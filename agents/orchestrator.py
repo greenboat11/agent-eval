@@ -3,10 +3,10 @@ from pathlib import Path
 
 import anthropic
 
+from agenteval.monitors.baseline_per_agent import ControlMonitor
 from bus.message import Message, MessageType
 from bus.message_bus import MessageBus
 from intake.challenge_fetcher import ChallengeData
-from monitor.control_monitor import ControlMonitor
 
 
 class OrchestratorAgent:
