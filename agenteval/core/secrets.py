@@ -21,7 +21,7 @@ _ENV_LINE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$")
 
 def _parse_env_file(path: Path) -> dict[str, str]:
     values: dict[str, str] = {}
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip() or line.strip().startswith("#"):
             continue
         m = _ENV_LINE.match(line)
@@ -93,7 +93,7 @@ def write_canary_env(path: Path) -> str:
     broker's canary check.
     """
     token = uuid.uuid4().hex
-    Path(path).write_text(_CANARY_TEMPLATE.format(var=CANARY_TOKEN_VAR, token=token))
+    Path(path).write_text(_CANARY_TEMPLATE.format(var=CANARY_TOKEN_VAR, token=token), encoding="utf-8")
     return token
 
 

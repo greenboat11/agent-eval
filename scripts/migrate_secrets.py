@@ -40,7 +40,7 @@ def main() -> None:
         return
 
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(REPO_ENV_PATH.read_text())
+    dest.write_text(REPO_ENV_PATH.read_text(encoding="utf-8"), encoding="utf-8")
     dest.chmod(0o600)
     print(f"copied {REPO_ENV_PATH} -> {dest}")
 
