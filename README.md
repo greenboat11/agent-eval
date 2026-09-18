@@ -194,7 +194,7 @@ what's built.
 | Invariants + replay (`python -m agenteval.replay`) | Complete for two invariant kinds (`forbidden_capability_pair`, `forbidden_zone_crossing`) |
 | Compositional monitor | Complete — reach analysis over broker-event capability graph; thresholds marked TODO-calibration |
 | Demo: same trace, two monitors, different verdicts (depth-2 catch vs. miss) | Complete — see `tests/test_replay_demo.py` |
-| Security hardening / containment (Task 3) | Not started |
+| Security hardening / containment (Task 3) | Core primitives complete — see `docs/CONTAINMENT.md`. Tool-wrapper broker integration is TODO |
 | Generational cohorts, cascade seeding, results schema (Task 4) | Not started |
 
 ---

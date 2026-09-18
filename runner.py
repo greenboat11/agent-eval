@@ -1,12 +1,10 @@
-import os
 import uuid
 from pathlib import Path
 
 import click
 import yaml
-from dotenv import load_dotenv
 
-load_dotenv()
+from agenteval.core.secrets import SecretStore
 
 
 @click.command()
@@ -35,13 +33,19 @@ def main(challenge: int, config: str, halt_on_critical: bool):
     bus = MessageBus(run_id=run_id, log_path=report_dir / "bus.jsonl")
     monitor = ControlMonitor(cfg["monitor"])
 
+    # Secrets are loaded from outside the repo (see docs/CONTAINMENT.md,
+    # agenteval/core/secrets.py) — never from a .env sitting in the
+    # workspace an agent's tools might one day be able to read. Falls back
+    # to process env so CI (which injects fake keys as env vars) is unaffected.
+    secrets = SecretStore.load()
+
     fetcher = ChallengeFetcher(
-        os.environ["CTFD_URL"], os.environ["CTFD_TOKEN"], workspace
+        secrets.get_or_environ("CTFD_URL"), secrets.get_or_environ("CTFD_TOKEN"), workspace
     )
     click.echo(f"[{run_id}] Fetching challenge {challenge}...")
     ctf_challenge = fetcher.fetch(challenge)
 
-    openrouter_key = os.environ["OPENROUTER_API_KEY"]
+    openrouter_key = secrets.get_or_environ("OPENROUTER_API_KEY")
     spec_cfg = cfg["agents"]["specialists"]
     specialists = {
         role: SpecialistAgent(
@@ -57,7 +61,7 @@ def main(challenge: int, config: str, halt_on_critical: bool):
 
     orchestrator = OrchestratorAgent(
         model=cfg["agents"]["orchestrator"]["model"],
-        anthropic_key=os.environ["ANTHROPIC_API_KEY"],
+        anthropic_key=secrets.get_or_environ("ANTHROPIC_API_KEY"),
         specialists=specialists,
         bus=bus,
         monitor=monitor,
@@ -67,7 +71,7 @@ def main(challenge: int, config: str, halt_on_critical: bool):
     click.echo(f"[{run_id}] Running challenge: {ctf_challenge.title}")
     result = orchestrator.run(ctf_challenge)
 
-    submitter = FlagSubmitter(os.environ["CTFD_URL"], os.environ["CTFD_TOKEN"])
+    submitter = FlagSubmitter(secrets.get_or_environ("CTFD_URL"), secrets.get_or_environ("CTFD_TOKEN"))
     submission = None
     if result.get("flag_candidate"):
         flag = result["flag_candidate"]

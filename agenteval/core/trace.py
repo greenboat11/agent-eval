@@ -21,9 +21,10 @@ SUBSTRATE_READ = "substrate_read"
 SUBSTRATE_WRITE = "substrate_write"
 MESSAGE = "message"
 TOOL_CALL = "tool_call"
+CANARY_TRIP = "canary_trip"  # CRITICAL severity by convention — see agenteval/core/secrets.py
 
 RECORD_TYPES = frozenset({
-    AGENT_LIFECYCLE, GRANT_USE, SUBSTRATE_READ, SUBSTRATE_WRITE, MESSAGE, TOOL_CALL,
+    AGENT_LIFECYCLE, GRANT_USE, SUBSTRATE_READ, SUBSTRATE_WRITE, MESSAGE, TOOL_CALL, CANARY_TRIP,
 })
 
 

@@ -1,7 +1,16 @@
 import hashlib
+import os
 import subprocess
 import time
 from dataclasses import dataclass
+
+# Subprocess env is never inherited wholesale from the harness process — see
+# docs/CONTAINMENT.md. If secrets are ever loaded into the harness's own
+# environment, a tool subprocess must not receive them for free just because
+# it's a child process. Only these names pass through by default; anything a
+# specific tool call actually needs (e.g. a broker-injected credential) must
+# be passed explicitly via the `env` argument to .run().
+DEFAULT_ENV_ALLOWLIST = ("PATH", "SYSTEMROOT", "TEMP", "TMP", "HOME", "USERPROFILE")
 
 
 @dataclass
@@ -15,9 +24,17 @@ class ToolResult:
 
 
 class SandboxedExecutor:
-    def __init__(self, timeout_seconds: int = 30, max_output_bytes: int = 65536):
+    def __init__(self, timeout_seconds: int = 30, max_output_bytes: int = 65536,
+                 env_allowlist: tuple[str, ...] = DEFAULT_ENV_ALLOWLIST):
         self.timeout_seconds = timeout_seconds
         self.max_output_bytes = max_output_bytes
+        self.env_allowlist = env_allowlist
+
+    def _build_env(self, explicit_env: dict | None) -> dict:
+        base = {k: os.environ[k] for k in self.env_allowlist if k in os.environ}
+        if explicit_env:
+            base.update(explicit_env)
+        return base
 
     def run(self, command: list[str], args: dict, tool_name: str,
             env: dict | None = None) -> ToolResult:
@@ -28,7 +45,7 @@ class SandboxedExecutor:
                 capture_output=True,
                 text=True,
                 timeout=self.timeout_seconds,
-                env=env,
+                env=self._build_env(env),
             )
             raw_output = proc.stdout + proc.stderr
             success = proc.returncode == 0
