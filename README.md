@@ -6,6 +6,17 @@ Motivated by the METR/OpenAI incident (August 2026), this framework runs agent t
 
 Two structured reports are generated per run — a capability assessment and a control evaluation — making results legible to both technical and policy audiences.
 
+> **Status note (2026-09-18):** the sections below describe the original
+> bus-compliance-monitoring thesis, which is tagged
+> [`v0.1`](../../releases/tag/v0.1) and remains runnable in that form.
+> The project has since pivoted to a compositional-capability evaluation —
+> see [`docs/adr/001-compositional-pivot.md`](docs/adr/001-compositional-pivot.md)
+> for why, and the **Compositional Pivot (current architecture)** section
+> below for what replaced it. `master` now implements the new architecture;
+> `monitor/control_monitor.py` is preserved unchanged as
+> `agenteval/monitors/baseline_per_agent.py`, the control arm of the new
+> experiment.
+
 ---
 
 ## What This Is
@@ -149,7 +160,13 @@ agent-eval/
 
 ## Status
 
-**In active development.** Current build: tools layer and message bus complete, 26 tests passing. Orchestrator, specialists, control monitor, and runner are next.
+**In active development, mid-pivot.** The v0.1 line below (bus-compliance
+monitoring) is feature-complete and tagged. Current work is the
+compositional-capability architecture described in
+[ADR 001](docs/adr/001-compositional-pivot.md); see the section below for
+what's built.
+
+**v0.1 (bus-compliance monitoring, tagged, preserved unchanged):**
 
 | Component | Status |
 |---|---|
@@ -157,12 +174,28 @@ agent-eval/
 | Message Bus | Complete |
 | Tool Executor | Complete |
 | Tool wrappers (all 6 categories) | Complete |
-| Challenge Intake + Flag Submitter | In progress |
-| Control Monitor | In progress |
-| Specialist Agents | In progress |
-| Orchestrator Agent | In progress |
-| Report Generator | In progress |
-| Runner CLI + CI | In progress |
+| Challenge Intake + Flag Submitter | Complete |
+| Control Monitor (now `agenteval/monitors/baseline_per_agent.py`) | Complete |
+| Specialist Agents | Complete |
+| Orchestrator Agent | Complete |
+| Report Generator | Complete |
+| Runner CLI + CI | Complete |
+
+**Compositional pivot (current architecture, ADR 001):**
+
+| Component | Status |
+|---|---|
+| ADR 001 | Complete |
+| `agenteval/core` \| `monitors` \| `experiments` package boundary + CI-enforced import test | Complete |
+| Population manifest (YAML, no hardcoded roster) | Complete — see `manifests/example_population.yaml` |
+| Capability broker | Complete (interface + grant mediation); tool-wrapper integration is TODO, tracked under Task 3 containment |
+| Hash-chained trace | Complete |
+| Substrate (pluggable resources + answer key) | Skeleton — stub resource implementations |
+| Invariants + replay (`python -m agenteval.replay`) | Complete for two invariant kinds (`forbidden_capability_pair`, `forbidden_zone_crossing`) |
+| Compositional monitor | Complete — reach analysis over broker-event capability graph; thresholds marked TODO-calibration |
+| Demo: same trace, two monitors, different verdicts (depth-2 catch vs. miss) | Complete — see `tests/test_replay_demo.py` |
+| Security hardening / containment (Task 3) | Not started |
+| Generational cohorts, cascade seeding, results schema (Task 4) | Not started |
 
 ---
 
