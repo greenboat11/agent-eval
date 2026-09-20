@@ -18,7 +18,7 @@ from pathlib import Path
 from agenteval.core.manifest import load_manifest
 from agenteval.core.secrets import SecretStore
 from agenteval.core.trace import TraceWriter, read_records
-from agenteval.experiments.agents import make_openrouter_specialist
+from agenteval.experiments.agents import CRYPTO_TOOL, make_openrouter_specialist
 from agenteval.experiments.cohorts import CohortRunner
 from agenteval.experiments.results import build_run_result, render_markdown
 
@@ -46,7 +46,7 @@ def main() -> None:
 
     trace = TraceWriter(trace_path)
     runner = CohortRunner(manifest, trace, wall_clock_seconds=120, secrets=secrets)
-    runner.run_all(make_openrouter_specialist(args.task, run_id=run_id))
+    runner.run_all(make_openrouter_specialist(args.task, CRYPTO_TOOL, run_id=run_id))
 
     ended_at = datetime.now(timezone.utc).isoformat()
     print(f"[{run_id}] real agent call completed in {time.monotonic() - start:.2f}s")

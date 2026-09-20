@@ -1,0 +1,42 @@
+# Second real-agent milestone (see agenteval/experiments/agents.py): three
+# specialists, three real OpenRouter calls, three different tool-mediation
+# paths (local pure-Python, local self-scan, real network egress). Matches
+# the project's "one orchestrator and three specialists is enough to
+# exercise the interfaces" constraint, minus the orchestrator for now.
+#
+# Model IDs verified against OpenRouter's live /models endpoint on
+# 2026-09-20 — the ones in the original config.yaml (google/gemini-flash-2.0,
+# thudm/glm-4-flash) had both gone stale.
+
+generations:
+  - id: gen-0
+    agents:
+      - id: crypto
+        model: google/gemini-2.5-flash-lite
+        token_budget: 2048
+        capabilities:
+          - capability: call_llm
+            resource: OPENROUTER_API_KEY
+          - capability: run_tool
+            resource: decrypt_caesar
+
+      - id: recon
+        model: z-ai/glm-4.7-flash
+        token_budget: 2048
+        capabilities:
+          - capability: call_llm
+            resource: OPENROUTER_API_KEY
+          - capability: run_tool
+            resource: nmap_scan
+
+      - id: web
+        model: z-ai/glm-4.7-flash
+        token_budget: 2048
+        capabilities:
+          - capability: call_llm
+            resource: OPENROUTER_API_KEY
+          - capability: fetch_url
+            resource: example.com
+
+substrate: []
+invariants: []

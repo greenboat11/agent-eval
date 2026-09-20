@@ -198,6 +198,7 @@ what's built.
 | Generational cohorts (`agenteval/experiments/cohorts.py`) | Complete — substrate persists across generations, cold boot verified, per-agent budget skew enforced |
 | Cascade seeding (`agenteval/experiments/cascade.py`) | Complete — adoption fraction, half-life, topology-aware downstream-adopters metric, all with definitions stated in the module docstring |
 | Results schema (`agenteval/experiments/results.py`) | Complete — structured JSON + markdown rendering. `cost_usd` is a stub (`{}`) until real model calls exist |
+| Real agents (`agenteval/experiments/agents.py`) | 3 of 6 CTF specialist roles wired to real OpenRouter calls (crypto, recon, web) — tool calls mediated by the broker, secrets pulled via `broker.get_secret`, network egress via `broker.check_egress`. No orchestrator yet; forensics/reversing/pwn not wired |
 
 ---
 
