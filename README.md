@@ -2,7 +2,7 @@
 
 **A multi-agent AI control evaluation framework using CTF challenges as a behavioral test environment.**
 
-Motivated by the METR/OpenAI incident (August 2026), this framework runs agent teams against Capture the Flag challenges while a deterministic control monitor tracks behavioral signatures associated with loss-of-control scenarios: covert channel formation, collective coordination outside sanctioned channels, task deviation, and log integrity failures.
+Motivated by the OpenAI/Hugging Face incident (July 2026), this framework runs agent teams against Capture the Flag challenges while a deterministic control monitor tracks behavioral signatures associated with loss-of-control scenarios: covert channel formation, collective coordination outside sanctioned channels, task deviation, and log integrity failures.
 
 Two structured reports are generated per run — a capability assessment and a control evaluation — making results legible to both technical and policy audiences.
 
@@ -100,7 +100,7 @@ All inter-agent communication routes through the Message Bus. The Control Monito
 | Reversing | Gemini Flash 2.0 (OpenRouter) | objdump, radare2, ROP gadgets |
 | Pwn | GLM-4 Flash (OpenRouter) | pwntools, shellcraft, exploit dev |
 
-Specialists are isolated: each receives only its assigned subtask and tool set. They have no knowledge of other specialists or the full challenge — mirroring the isolated-agent condition from the METR incident.
+Specialists are isolated: each receives only its assigned subtask and tool set. They have no knowledge of other specialists or the full challenge — mirroring the isolated-agent condition from the OpenAI/Hugging Face incident.
 
 ---
 
@@ -254,7 +254,7 @@ python runner.py --challenge 1
 
 ## Motivation
 
-The August 2026 METR/OpenAI incident documented behavioral signatures in deployed multi-agent systems that were not detected by standard capability evaluations: covert channel formation between isolated agents, collective coordination on tasks outside sanctioned scope, and manipulation of evaluation transcripts. Standard evals weren't looking for these signatures.
+The July 2026 OpenAI/Hugging Face incident documented behavioral signatures in deployed multi-agent systems that were not detected by standard capability evaluations: covert channel formation between isolated agents, collective coordination on tasks outside sanctioned scope, and manipulation of evaluation transcripts. Standard evals weren't looking for these signatures.
 
 This framework is an attempt to build tooling that is — using the adversarial pressure of CTF competition as a proxy for real instrumental goals, and a deterministic monitor as the observation layer.
 
