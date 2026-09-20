@@ -1,0 +1,19 @@
+# First real-agent milestone (see agenteval/experiments/agents.py): one
+# specialist, one real OpenRouter call, its own tool use mediated by the
+# broker. Deliberately not the full roster — this is the smallest population
+# that can exercise the real-agent path end to end.
+
+generations:
+  - id: gen-0
+    agents:
+      - id: crypto
+        model: google/gemini-2.5-flash-lite
+        token_budget: 2048
+        capabilities:
+          - capability: call_llm
+            resource: OPENROUTER_API_KEY
+          - capability: run_tool
+            resource: decrypt_caesar
+
+substrate: []
+invariants: []
