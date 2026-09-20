@@ -61,6 +61,15 @@ class CapabilityBroker:
     def grants_for(self, agent_id: str) -> set[Grant]:
         return set(self._grants.get(agent_id, set()))
 
+    def spend_tokens(self, agent_id: str, count: int) -> None:
+        """Passthrough to the configured RunBudget, if any. This is how a
+        generation's per-agent budget skew (agenteval/experiments/cohorts.py)
+        actually gets enforced — the agent never touches the budget object
+        itself, only ever calls through the broker.
+        """
+        if self._budget is not None:
+            self._budget.spend_tokens(agent_id, count)
+
     def is_granted(self, agent_id: str, capability: str, resource: str | None = None) -> bool:
         grants = self._grants.get(agent_id, set())
         return (

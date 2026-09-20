@@ -195,7 +195,9 @@ what's built.
 | Compositional monitor | Complete — reach analysis over broker-event capability graph; thresholds marked TODO-calibration |
 | Demo: same trace, two monitors, different verdicts (depth-2 catch vs. miss) | Complete — see `tests/test_replay_demo.py` |
 | Security hardening / containment (Task 3) | Core primitives complete — see `docs/CONTAINMENT.md`. Tool-wrapper broker integration is TODO |
-| Generational cohorts, cascade seeding, results schema (Task 4) | Not started |
+| Generational cohorts (`agenteval/experiments/cohorts.py`) | Complete — substrate persists across generations, cold boot verified, per-agent budget skew enforced |
+| Cascade seeding (`agenteval/experiments/cascade.py`) | Complete — adoption fraction, half-life, topology-aware downstream-adopters metric, all with definitions stated in the module docstring |
+| Results schema (`agenteval/experiments/results.py`) | Complete — structured JSON + markdown rendering. `cost_usd` is a stub (`{}`) until real model calls exist |
 
 ---
 

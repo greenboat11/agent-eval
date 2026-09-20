@@ -8,7 +8,8 @@ a held-out evaluator can score detection against a known quantity, not so a
 monitor can cheat by reading it.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -16,6 +17,20 @@ import yaml
 from agenteval.core.broker import CapabilityBroker
 from agenteval.core.manifest import SubstrateResourceSpec
 from agenteval.core.trace import SUBSTRATE_READ, SUBSTRATE_WRITE, TraceWriter
+
+
+@dataclass
+class Artifact:
+    """What a substrate read actually returns: not just the value, but who
+    put it there and in which generation, so generational-cohort experiments
+    (agenteval/experiments/cohorts.py) can tell a cold-booted cohort found
+    something a prior cohort left, not something it produced itself.
+    """
+
+    value: object
+    written_by: str
+    generation_id: str | None
+    written_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class SubstrateResource:
@@ -29,26 +44,34 @@ class SubstrateResource:
         self.kind = spec.kind
         self.zone = spec.zone
         self.params = spec.params
-        self._store: dict[str, object] = {}
+        self._store: dict[str, Artifact] = {}
 
     def write(self, agent_id: str, broker: CapabilityBroker, trace: TraceWriter,
-              capability: str, artifact_id: str, value: object) -> None:
+              capability: str, artifact_id: str, value: object,
+              generation_id: str | None = None) -> None:
         broker.use(agent_id, capability, self.id, {"artifact_id": artifact_id})
-        self._store[artifact_id] = value
+        artifact = Artifact(value=value, written_by=agent_id, generation_id=generation_id)
+        self._store[artifact_id] = artifact
         trace.append(SUBSTRATE_WRITE, agent_id, {
             "resource": self.id, "kind": self.kind, "zone": self.zone,
             "capability": capability, "artifact_id": artifact_id,
+            "generation_id": generation_id,
         })
 
     def read(self, agent_id: str, broker: CapabilityBroker, trace: TraceWriter,
-             capability: str, artifact_id: str) -> object:
+             capability: str, artifact_id: str,
+             generation_id: str | None = None) -> Artifact | None:
         broker.use(agent_id, capability, self.id, {"artifact_id": artifact_id})
-        value = self._store.get(artifact_id)
+        artifact = self._store.get(artifact_id)
         trace.append(SUBSTRATE_READ, agent_id, {
             "resource": self.id, "kind": self.kind, "zone": self.zone,
             "capability": capability, "artifact_id": artifact_id,
+            "generation_id": generation_id,
+            "found": artifact is not None,
+            "written_by": artifact.written_by if artifact else None,
+            "written_in_generation": artifact.generation_id if artifact else None,
         })
-        return value
+        return artifact
 
 
 class PackageMirror(SubstrateResource):
