@@ -6,51 +6,15 @@ Motivated by the OpenAI/Hugging Face incident (July 2026), this framework runs a
 
 Two structured reports are generated per run — a capability assessment and a control evaluation — making results legible to both technical and policy audiences.
 
-> **Status note (2026-09-18):** the sections below describe the original
-> bus-compliance-monitoring thesis, which is tagged
-> [`v0.1`](../../releases/tag/v0.1) and remains runnable in that form.
-> The project has since pivoted to a compositional-capability evaluation —
-> see [`docs/adr/001-compositional-pivot.md`](docs/adr/001-compositional-pivot.md)
-> for why, and the **Compositional Pivot (current architecture)** section
-> below for what replaced it. `master` now implements the new architecture;
-> `monitor/control_monitor.py` is preserved unchanged as
-> `agenteval/monitors/baseline_per_agent.py`, the control arm of the new
-> experiment.
+> **Status note (2026-09-20):** the sections below are `v0.1` — tagged,
+> complete, and still the active line of work. A second, newer line of
+> work (compositional-capability evaluation) also lives in this repo; see
+> **A Second Question**, near the bottom, for what that is and why it's
+> separate rather than a replacement.
 
 ---
 
-## Compositional Pivot (current architecture)
-
-**The short version:** the original design assumed a monitor watching a mandatory communication channel would catch anything that mattered — "if agents talk, we see it." A real July 2026 incident broke that assumption: agents coordinated through a shared resource (a package cache) that nobody had ever labeled as a communication channel, so a channel-watching monitor was structurally blind to it — not because it was buggy, but because it was never looking there. This project pivoted from "watch the channel" to "watch what individually-permitted actions add up to across a group of agents" — see [`docs/adr/001-compositional-pivot.md`](docs/adr/001-compositional-pivot.md) for the full reasoning, written for a reader who doesn't need to read code to follow it.
-
-**What that looks like as running software:**
-
-- **A population manifest** (`manifests/*.yaml`) declares, in plain YAML, exactly what each agent is allowed to touch — no agent's permissions are hardcoded in Python. Change the YAML, change what an agent can do.
-- **A capability broker** is the only path through which any agent — real or simulated — can use a tool, read a secret, or reach the network. Every use is checked against the manifest and logged.
-- **A tamper-evident trace**: every action any agent takes is written to an append-only, hash-chained log. If anyone edits an old entry, replaying the log detects it immediately.
-- **Two monitors, one trace**: `python -m agenteval.replay` runs either the original per-agent monitor or the new cross-agent ("compositional") monitor against the exact same recorded run. The demo that motivates this whole rebuild: given a scenario where two agents each use one harmless-looking permission that combine into something neither was individually allowed to do, the old monitor sees nothing wrong, and the new one catches it and reports exactly which agents were involved. That gap — provable, reproducible, on demand — is the project's central result so far.
-- **Security hardening** (`docs/CONTAINMENT.md`): real credentials never sit where an agent's tools could stumble onto them, network access is default-denied unless explicitly allowed, and there's a decoy file wired to raise an alarm if anything ever reads it.
-- **Real agents, not just simulations**: three of the eventual six specialist roles (crypto, recon, web) now make real calls to real language models, decide on their own whether to use a real tool, and have every one of those decisions checked by the broker before it happens — including one that reaches out to a real (safe, deliberately reserved-for-testing) website. This isn't a mockup of the idea; it's the idea actually running, at small and inexpensive scale.
-
-The `v0.1` tag preserves the pre-pivot version exactly as it was, so the original thesis stays citable rather than being erased by the rewrite.
-
-**See it yourself, no API key required (makes zero API calls):**
-
-```bash
-python -m agenteval.dry_run
-```
-
-This runs the depth-2 catch/miss demo end to end and writes a trace plus a structured `result.md` under `runs/`.
-
-**See a real agent decide to use a real tool** (small, billed OpenRouter calls — a fraction of a cent):
-
-```bash
-python -m agenteval.three_agent_test
-```
-
----
-
-## What This Is (original v0.1 thesis — see pivot note above)
+## What This Is
 
 Most AI control evaluations are synthetic: researchers construct scenarios designed to elicit specific behaviors. This framework uses CTF challenges as a naturalistic test environment — the agents have genuine instrumental goals (capture flags, score points) that create real pressure to deviate, coordinate outside permitted channels, or manipulate evaluation artifacts.
 
@@ -189,13 +153,25 @@ agent-eval/
 
 ---
 
+## A Second Question: Compositional Capability Evaluation
+
+`v0.1` above asks whether a monitor watching a mandatory channel can catch loss-of-control behavior within that channel. A July 2026 incident raised a narrower, harder question: can a *group's* individually-permitted capabilities combine into a violation that no single agent's channel-scoped view was built to see? That's a different question, not a flaw in `v0.1` — full reasoning in [ADR 001](docs/adr/001-compositional-pivot.md).
+
+Built so far: a YAML manifest declaring exactly what each agent may touch, a capability broker mediating every tool/secret/network access through it, a tamper-evident hash-chained trace, and two monitors runnable against the same trace (`python -m agenteval.replay`) — the original per-agent one, and a new cross-agent one. The demo: two agents each use one harmless permission that combine into something neither was allowed alone; the per-agent monitor misses it, the new one catches it and names both agents. Three specialist roles (crypto, recon, web) already make real, broker-mediated calls to real models — see `docs/CONTAINMENT.md` for the security hardening around that.
+
+Try it (no API key, no cost): `python -m agenteval.dry_run`. With real agents (a fraction of a cent): `python -m agenteval.three_agent_test`.
+
+`v0.1` is tagged and untouched — its own answer to its own question, not an earlier draft of this one.
+
+---
+
 ## Status
 
-**In active development, mid-pivot.** The v0.1 line below (bus-compliance
-monitoring) is feature-complete and tagged. Current work is the
-compositional-capability architecture described in
-[ADR 001](docs/adr/001-compositional-pivot.md); see the section below for
-what's built.
+**Two lines of work, both active.** `v0.1` (bus-compliance monitoring) is
+feature-complete and tagged. A second, newer line of work — compositional-
+capability evaluation, described in
+[ADR 001](docs/adr/001-compositional-pivot.md) — is currently where new
+development is happening; see the section below for what's built there.
 
 **v0.1 (bus-compliance monitoring, tagged, preserved unchanged):**
 
@@ -212,7 +188,7 @@ what's built.
 | Report Generator | Complete |
 | Runner CLI + CI | Complete |
 
-**Compositional pivot (current architecture, ADR 001):**
+**Compositional capability evaluation (second line of work, ADR 001):**
 
 | Component | Status |
 |---|---|

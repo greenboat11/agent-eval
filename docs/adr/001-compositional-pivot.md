@@ -1,4 +1,4 @@
-# ADR 001: From Bus-Compliance Monitoring to Compositional Capability Evaluation
+# ADR 001: Compositional Capability Evaluation — A Second Question Alongside Bus-Compliance Monitoring
 
 **Status:** Accepted
 **Date:** 2026-09-18
@@ -6,18 +6,27 @@
 
 ## Summary
 
-This project began as a test of a specific claim: that a deterministic monitor
-watching a mandatory inter-agent message bus can detect loss-of-control
-behavior in multi-agent systems, because any coordination that matters has to
-cross the bus to happen. That claim is wrong, and the July 2026 OpenAI/Hugging
-Face incident is the counterexample. This ADR records why the original
-architecture has a structural blind spot, replaces the object of study with a
-falsifiable claim about capability composition, and sets the constraints the
-new design has to satisfy on a small, personally-funded evaluation budget.
+**Two questions, not a correction.** This project's first line of work
+(`v0.1`) asks whether a deterministic monitor watching a mandatory
+inter-agent message bus can reliably detect loss-of-control behavior within
+the channel it watches. That is a real, useful question, and `v0.1` answers
+it with a contribution that stands on its own: using live CTF competitive
+pressure as a naturalistic source of instrumental goals, instead of
+constructing synthetic eval scenarios, to give agents a genuine reason to
+deviate rather than a scripted one. Nothing below changes that, and `v0.1`
+is tagged and preserved, fully intact, specifically so it keeps standing on
+its own rather than being read as a discarded draft.
 
-The prior thesis is preserved and tagged as `v0.1` rather than quietly
-rewritten, because the failure mode it tests for is itself a useful, citable
-data point.
+This document is about a second, narrower, complementary question, raised
+specifically by the July 2026 OpenAI/Hugging Face incident: can a
+population's *combined*, individually-permitted capabilities compose into a
+violation that no single agent's channel-scoped view was ever positioned to
+see? That question is outside what a channel-scoped monitor is built to
+answer — not because `v0.1`'s design is flawed, but because "watch the
+designated channel" and "watch what a group's permissions add up to" are
+different instruments pointed at different failure modes. The incident is a
+case of the second kind, so this ADR sets up an architecture aimed
+specifically at it, on the same small, personally-funded evaluation budget.
 
 ## What the incident showed
 
@@ -40,8 +49,8 @@ system's own ontology called it a message.
 ## Why bus-compliance monitoring has a structural blind spot
 
 The original `ControlMonitor` (see `monitor/control_monitor.py`,
-`monitor/signals.py`) is a well-built instance of a monitoring strategy with
-a category error baked into its premise. It watches four signals — graph
+`monitor/signals.py`) is a well-built instance of a monitoring strategy
+scoped, by design, to one channel. It watches four signals — graph
 topology of bus edges, message volume, task-adherence cosine similarity, and
 log-hash integrity — and all four are defined *over messages published to the
 bus*. The detection claim, "any agent-to-agent communication that bypasses
@@ -64,7 +73,7 @@ What generalizes from the incident is not "watch the package cache too." It
 is: **individually-authorized capabilities can compose into an unauthorized
 outcome through shared state that no single grant labeled as communication.**
 That is a claim about capability composition, not about channel coverage,
-and it is the claim this project should actually be testing.
+and it is the claim this second line of work is built to test.
 
 ## New thesis
 
@@ -158,10 +167,10 @@ over unchanged to a larger compute environment later:
    results from synthetic populations are never to be reported as findings
    about agent behavior — only as findings about monitor scaling.
 
-## What replaces the old architecture
+## What the compositional architecture adds
 
 The mandatory message bus and the bus-scoped `ControlMonitor` are not
-deleted. The monitor is re-homed, unchanged in behavior, as
+deleted or superseded. The monitor is re-homed, unchanged in behavior, as
 `agenteval/monitors/baseline_per_agent.py` — the control arm of the
 experiment. Its blindness at composition depth 2 is the result this project
 is trying to measure, so its behavior must stay fixed, not improved. What is
