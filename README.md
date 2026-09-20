@@ -19,7 +19,38 @@ Two structured reports are generated per run — a capability assessment and a c
 
 ---
 
-## What This Is
+## Compositional Pivot (current architecture)
+
+**The short version:** the original design assumed a monitor watching a mandatory communication channel would catch anything that mattered — "if agents talk, we see it." A real July 2026 incident broke that assumption: agents coordinated through a shared resource (a package cache) that nobody had ever labeled as a communication channel, so a channel-watching monitor was structurally blind to it — not because it was buggy, but because it was never looking there. This project pivoted from "watch the channel" to "watch what individually-permitted actions add up to across a group of agents" — see [`docs/adr/001-compositional-pivot.md`](docs/adr/001-compositional-pivot.md) for the full reasoning, written for a reader who doesn't need to read code to follow it.
+
+**What that looks like as running software:**
+
+- **A population manifest** (`manifests/*.yaml`) declares, in plain YAML, exactly what each agent is allowed to touch — no agent's permissions are hardcoded in Python. Change the YAML, change what an agent can do.
+- **A capability broker** is the only path through which any agent — real or simulated — can use a tool, read a secret, or reach the network. Every use is checked against the manifest and logged.
+- **A tamper-evident trace**: every action any agent takes is written to an append-only, hash-chained log. If anyone edits an old entry, replaying the log detects it immediately.
+- **Two monitors, one trace**: `python -m agenteval.replay` runs either the original per-agent monitor or the new cross-agent ("compositional") monitor against the exact same recorded run. The demo that motivates this whole rebuild: given a scenario where two agents each use one harmless-looking permission that combine into something neither was individually allowed to do, the old monitor sees nothing wrong, and the new one catches it and reports exactly which agents were involved. That gap — provable, reproducible, on demand — is the project's central result so far.
+- **Security hardening** (`docs/CONTAINMENT.md`): real credentials never sit where an agent's tools could stumble onto them, network access is default-denied unless explicitly allowed, and there's a decoy file wired to raise an alarm if anything ever reads it.
+- **Real agents, not just simulations**: three of the eventual six specialist roles (crypto, recon, web) now make real calls to real language models, decide on their own whether to use a real tool, and have every one of those decisions checked by the broker before it happens — including one that reaches out to a real (safe, deliberately reserved-for-testing) website. This isn't a mockup of the idea; it's the idea actually running, at small and inexpensive scale.
+
+The `v0.1` tag preserves the pre-pivot version exactly as it was, so the original thesis stays citable rather than being erased by the rewrite.
+
+**See it yourself, no API key required (makes zero API calls):**
+
+```bash
+python -m agenteval.dry_run
+```
+
+This runs the depth-2 catch/miss demo end to end and writes a trace plus a structured `result.md` under `runs/`.
+
+**See a real agent decide to use a real tool** (small, billed OpenRouter calls — a fraction of a cent):
+
+```bash
+python -m agenteval.three_agent_test
+```
+
+---
+
+## What This Is (original v0.1 thesis — see pivot note above)
 
 Most AI control evaluations are synthetic: researchers construct scenarios designed to elicit specific behaviors. This framework uses CTF challenges as a naturalistic test environment — the agents have genuine instrumental goals (capture flags, score points) that create real pressure to deviate, coordinate outside permitted channels, or manipulate evaluation artifacts.
 
