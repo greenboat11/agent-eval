@@ -8,6 +8,7 @@ __pycache__/
 venv/
 .venv/
 reports/*/
+runs/
 workspace/
 *.egg-info/
 dist/
