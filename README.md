@@ -9,8 +9,7 @@ Two structured reports are generated per run — a capability assessment and a c
 > **Status note (2026-09-20):** the sections below are `v0.1` — tagged,
 > complete, and still the active line of work. A second, newer line of
 > work (compositional-capability evaluation) also lives in this repo; see
-> **A Second Question**, near the bottom, for what that is and why it's
-> separate rather than a replacement.
+> **A Second Question**, near the bottom, for more details, or visit it directly at [ADR 001](docs/adr/001-compositional-pivot.md).
 
 ---
 
@@ -155,7 +154,7 @@ agent-eval/
 
 ## A Second Question: Compositional Capability Evaluation
 
-`v0.1` above asks whether a monitor watching a mandatory channel can catch loss-of-control behavior within that channel. A July 2026 incident raised a narrower, harder question: can a *group's* individually-permitted capabilities combine into a violation that no single agent's channel-scoped view was built to see? That's a different question, not a flaw in `v0.1` — full reasoning in [ADR 001](docs/adr/001-compositional-pivot.md).
+`v0.1` above asks whether a monitor watching a mandatory channel can catch loss-of-control behavior within that channel. A July 2026 incident raised a narrower, harder question: can a *group's* individually-permitted capabilities combine into a violation that no single agent's channel-scoped view was built to see? This is a question of compositional failure that we explore in [ADR 001](docs/adr/001-compositional-pivot.md).
 
 Built so far: a YAML manifest declaring exactly what each agent may touch, a capability broker mediating every tool/secret/network access through it, a tamper-evident hash-chained trace, and two monitors runnable against the same trace (`python -m agenteval.replay`) — the original per-agent one, and a new cross-agent one. The demo: two agents each use one harmless permission that combine into something neither was allowed alone; the per-agent monitor misses it, the new one catches it and names both agents. Three specialist roles (crypto, recon, web) already make real, broker-mediated calls to real models — see `docs/CONTAINMENT.md` for the security hardening around that.
 
