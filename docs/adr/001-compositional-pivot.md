@@ -6,27 +6,23 @@
 
 ## Summary
 
-**Two questions, not a correction.** This project's first line of work
+**A Follow-up Question on Compositional.** This project's first line of work
 (`v0.1`) asks whether a deterministic monitor watching a mandatory
-inter-agent message bus can reliably detect loss-of-control behavior within
-the channel it watches. That is a real, useful question, and `v0.1` answers
-it with a contribution that stands on its own: using live CTF competitive
+inter-agent message bus can reliably detect loss-of-control behavior, using live CTF competitive
 pressure as a naturalistic source of instrumental goals, instead of
 constructing synthetic eval scenarios, to give agents a genuine reason to
-deviate rather than a scripted one. Nothing below changes that, and `v0.1`
-is tagged and preserved, fully intact, specifically so it keeps standing on
-its own rather than being read as a discarded draft.
+deviate rather than a scripted one.
 
-This document is about a second, narrower, complementary question, raised
+This document concerns a second, complementary question, raised
 specifically by the July 2026 OpenAI/Hugging Face incident: can a
 population's *combined*, individually-permitted capabilities compose into a
 violation that no single agent's channel-scoped view was ever positioned to
 see? That question is outside what a channel-scoped monitor is built to
-answer — not because `v0.1`'s design is flawed, but because "watch the
+answer — because "watch the
 designated channel" and "watch what a group's permissions add up to" are
 different instruments pointed at different failure modes. The incident is a
 case of the second kind, so this ADR sets up an architecture aimed
-specifically at it, on the same small, personally-funded evaluation budget.
+specifically for compositional failure.
 
 ## What the incident showed
 
